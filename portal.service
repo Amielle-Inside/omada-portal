@@ -1,0 +1,18 @@
+[Unit]
+Description=NewsInside Portal Cativo (Omada SDN + LivePix)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=Amielle
+WorkingDirectory=/var/home/Amielle/apps/Omada/portal
+ExecStart=/usr/bin/python3 /var/home/Amielle/apps/Omada/portal/portal_server.py
+Restart=on-failure
+RestartSec=5
+# Secrets carregados do EnvironmentFile (não versionar!)
+EnvironmentFile=/var/home/Amielle/apps/Omada/portal/data/portal.env
+Environment=PORTAL_PORT=8089
+
+[Install]
+WantedBy=default.target

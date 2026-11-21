@@ -1,0 +1,129 @@
+<!-- =============================================================================
+     pay.html — Página de pagamento PIX do Portal Cativo NewsInside_Portal
+     =============================================================================
+     Fluxo:
+     1. Exibe valor do PIX (R$ 5,00 padrão; R$ 25,00 Apple)
+     2. Botão "Pagar com PIX" chama /pay/create (gera cobrança LivePix)
+     3. Abre o checkout do LivePix na mesma aba (portal cativo bloqueia popup)
+     4. Polling a cada 5s em /check?t=TOKEN aguarda confirmação
+     5. Ao voltar do LivePix (ou recarregar), verifica se já foi pago
+     6. Usuários de teste (PORTAL_TEST_USERS) podem simular pagamento via /pay/simulate
+     ============================================================================= -->
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NewsInside_Portal — Pagamento</title>
+<style>
+:root{--bg:#0f1220;--card:#181c2f;--txt:#e8eaf6;--mut:#9aa3c7;--acc:#5b8cff;--ok:#3ddc84}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--txt);
+min-height:100vh;display:flex;align-items:center;justify-content:center;padding:16px}
+.card{background:var(--card);border-radius:16px;padding:28px;max-width:440px;width:100%;
+box-shadow:0 8px 32px rgba(0,0,0,.4);text-align:center}
+h1{font-size:1.2rem;margin-bottom:6px}
+p.sub{color:var(--mut);font-size:.85rem;margin-bottom:20px}
+.valor{font-size:2.6rem;font-weight:800;color:var(--acc);margin:18px 0}
+.btn{width:100%;padding:14px;border:0;border-radius:12px;background:var(--acc);color:#fff;
+font-size:1.05rem;font-weight:700;cursor:pointer;text-decoration:none;display:block}
+.btn:active{transform:scale(.98)}
+.status{margin-top:18px;font-size:.9rem;color:var(--mut)}
+.spin{display:inline-block;width:14px;height:14px;border:2px solid var(--mut);border-top-color:var(--acc);
+border-radius:50%;animation:r 1s linear infinite;vertical-align:-2px;margin-right:6px}
+@keyframes r{to{transform:rotate(360deg)}}
+.done{display:none}
+.done .check{font-size:3rem}
+.okmsg{color:var(--ok);font-weight:700;font-size:1.1rem}
+small.meta{color:var(--mut);font-size:.75rem;display:block;margin-top:14px;line-height:1.6}
+</style>
+</head>
+<body>
+<div class="card">
+  <div id="paybox">
+    <h1>Quase lá, {{username}}!</h1>
+    <p class="sub">Pague via PIX para liberar 1 hora de internet</p>
+    <div class="valor">{{valor}}</div>
+    <a class="btn" id="btnPay" href="#" onclick="startPix(event)">Pagar com PIX</a>
+    {{test_block}}
+    <div class="status" id="status" style="display:none">
+      <span class="spin"></span>Aguardando confirmação do pagamento…
+    </div>
+    <small class="meta">
+      Dispositivo detectado: <b>{{device}}</b><br>
+      Após o pagamento, a conexão é liberada automaticamente em até 30 segundos.<br>
+      Mantenha esta página aberta até a confirmação.
+    </small>
+  </div>
+  <div class="done" id="donebox">
+    <div class="check">✅</div>
+    <p class="okmsg">Pagamento confirmado!</p>
+    <p class="status">Conectado por 1 hora. Você já pode usar a internet normalmente.</p>
+  </div>
+</div>
+<script>
+const TOKEN = "{{token}}";
+let pollTimer = null;
+function startPix(e){
+  e.preventDefault();
+  document.getElementById('btnPay').style.display='none';
+  document.getElementById('status').style.display='';
+  fetch('/pay/create', {method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded'},
+    body:'t='+encodeURIComponent(TOKEN)})
+    .then(r=>r.json())
+    .then(d=>{
+      if(d.status==='paid'){ finish(); return; }
+      if(d.checkout){
+        // mini-navegador do portal cativo bloqueia popups: abre na mesma aba.
+        // O LivePix redireciona de volta para /pay?t=... após o pagamento.
+        try{ sessionStorage.setItem('pix_started_'+TOKEN,'1'); }catch(_){}
+        document.getElementById('status').innerHTML=
+          '<span class="spin"></span>Abrindo pagamento… <a href="'+d.checkout+'" style="color:var(--acc)">toque aqui se não abrir</a>';
+        poll();
+        window.location.href = d.checkout;
+      } else {
+        document.getElementById('status').innerHTML='Erro ao gerar PIX: '+(d.error||'tente novamente');
+      }
+    })
+    .catch(()=>{document.getElementById('status').innerHTML='Falha de rede. Recarregue a página.';});
+}
+function simulatePix(e){
+  e.preventDefault();
+  document.getElementById('status').style.display='';
+  document.getElementById('status').innerHTML='<span class="spin"></span>Simulando pagamento…';
+  fetch('/pay/simulate',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},
+    body:'t='+encodeURIComponent(TOKEN)}).then(r=>r.json()).then(d=>{
+      if(d.status==='authorized'){ finish(); }
+      else { document.getElementById('status').innerHTML='Simulação: '+(d.status||d.error||'erro'); }
+    }).catch(()=>{document.getElementById('status').innerHTML='Falha de rede.';});
+}
+function poll(){
+  if(pollTimer) return;
+  pollTimer = setInterval(()=>{
+    fetch('/check?t='+encodeURIComponent(TOKEN)).then(r=>r.json()).then(d=>{
+      if(d.status==='authorized'){ finish(); }
+    }).catch(()=>{});
+  }, 5000);
+}
+// ao voltar do LivePix (ou recarregar), verifica sozinho se já foi pago
+(function resume(){
+  let started=false; try{ started = sessionStorage.getItem('pix_started_'+TOKEN)==='1'; }catch(_){}
+  fetch('/check?t='+encodeURIComponent(TOKEN)).then(r=>r.json()).then(d=>{
+    if(d.status==='authorized'){ finish(); return; }
+    if(started || d.status==='awaiting_payment'){
+      if(started){
+        document.getElementById('btnPay').textContent='Abrir pagamento novamente';
+        document.getElementById('status').style.display='';
+      }
+      poll();
+    }
+  }).catch(()=>{});
+})();
+function finish(){
+  clearInterval(pollTimer);
+  document.getElementById('paybox').style.display='none';
+  document.getElementById('donebox').style.display='block';
+}
+</script>
+</body>
+</html>

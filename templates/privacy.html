@@ -1,0 +1,73 @@
+<!-- =============================================================================
+     privacy.html — Política de Privacidade (LGPD) do Portal Cativo
+     =============================================================================
+     Exibe: quem somos, finalidade do tratamento, dados coletados, base legal,
+     prazos de retenção, direitos do titular (acesso, correção, exclusão,
+     portabilidade, revogação de consentimento) e como exercê-los
+     (/me/export e /me/delete).
+     ============================================================================= -->
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Política de Privacidade — NewsInside_Portal</title>
+<style>
+body{font-family:system-ui,sans-serif;background:#0f1220;color:#e8eaf6;max-width:720px;margin:0 auto;padding:32px;line-height:1.7}
+h1{color:#5b8cff}h2{margin-top:28px;font-size:1.05rem}
+a{color:#5b8cff}
+.card{background:#181c2f;border-radius:14px;padding:28px;margin-top:24px}
+.back{display:inline-block;margin-top:24px}
+</style>
+</head>
+<body>
+<h1>Política de Privacidade — NewsInside_Portal</h1>
+<p><b>Controlador dos dados:</b> NewsInside (rede local NewsInside_Portal).<br>
+<b>Atualizada:</b> outubro de 2026 · <b>Base legal:</b> Lei nº 13.709/2018 (LGPD), art. 7º, V e art. 11 (consentimento).</p>
+
+<h2>1. Quais dados coletamos</h2>
+<ul>
+<li><b>Usuário e senha</b> — a senha é armazenada apenas como <i>hash</i> (scrypt + salt), nunca em texto puro. Não temos como recuperar sua senha.</li>
+<li><b>Dados de identificação (cadastro)</b> — nome completo, CPF e e-mail, coletados no ato do registro para validação de identidade:
+  <ul>
+  <li>O <b>CPF</b> é verificado quanto à autenticidade (dígito verificador oficial) e à unicidade (uma conta por pessoa). <b>Quando habilitada a integração oficial</b> (Cadastro Base do Cidadão — CPF Light, Receita Federal), a verificação inclui a situação cadastral e a correspondência do nome. Armazenamos apenas um <i>hash</i> irreversível (SHA-256) para impedir duplicatas e a forma mascarada (***.000.000-**) — <b>nunca</b> o CPF completo.</li>
+  <li>O <b>nome</b> informado é o que mantemos. Na validação oficial, é comparado com o nome registrado no CPF apenas para validar o cadastro.</li>
+  <li><b>Nome social:</b> se você declara usar nome social, a validação é feita <b>exclusivamente</b> pelo nome social registrado na base do CPF. Seu <b>nome de registro nunca é lido, comparado, armazenado ou exibido</b> em nenhuma hipótese (proteção reforçada por código e testes automatizados).</li>
+  <li><b>E-mail</b> — validado por formato e existência de domínio (MX). Usado apenas para identificação da conta.</li>
+  </ul></li>
+<li><b>Identificadores técnicos</b> — endereço IP e endereço MAC do seu dispositivo (necessários para liberar o acesso na rede).</li>
+<li><b>Registro de acesso</b> — data/hora de login, tipo de dispositivo (sistema operacional) e ocorrências (pagamento, autorização). Logs de registro NÃO contêm nome completo nem CPF.</li>
+<li><b>Registro de pagamento</b> — referência, valor e comprovante (proof) da transação PIX processada pela LivePix. Não acessamos nem armazenamos dados bancários.</li>
+</ul>
+
+<h2>2. Finalidade</h2>
+<ul>
+<li>Autenticar usuários da rede e liberar o acesso pago por tempo determinado (1 hora);</li>
+<li>Aplicar limite de velocidade contratado;</li>
+<li>Comprovar pagamento e prevenir fraude (uso indevido da rede);</li>
+<li>Cumprir obrigação de registro de acesso.</li>
+</ul>
+
+<h2>3. Prazo de conservação</h2>
+<p>Os logs de acesso são mantidos por <b>90 dias</b> e removidos automaticamente. Contas e dados associados são excluídos imediatamente mediante solicitação.</p>
+
+<h2>4. Compartilhamento</h2>
+<p>Dados de pagamento (valor, referência) são processados pela <b>LivePix</b> (livepix.gg) exclusivamente para confirmação do PIX. Nenhum dado é vendido ou compartilhado com terceiros para marketing.</p>
+
+<h2>5. Seus direitos (art. 18, LGPD)</h2>
+<p>Você pode, a qualquer momento:</p>
+<ul>
+<li><b>Confirmar o tratamento</b> e acessar seus dados: <code>/me/export?t=SEU_TOKEN</code></li>
+<li><b>Excluir todos os seus dados</b> (anonimização irreversível): <code>/me/delete?t=SEU_TOKEN</code></li>
+<li><b>Revogar o consentimento</b> — a exclusão dos dados encerra o tratamento.</li>
+</ul>
+
+<h2>6. Segurança</h2>
+<p>Senhas com hash scrypt; sessões com token aleatório de 256 bits; rede isolada em VLAN própria com saída restrita ao portal até a autorização.</p>
+
+<h2>7. Contato do encarregado (DPO)</h2>
+<p>Solicitações de direitos do titular: <b>amielle@newsinside.org</b>. Resposta em até 15 dias (art. 19, §1º).</p>
+
+<a class="back" href="javascript:history.back()">← Voltar</a>
+</body>
+</html>

@@ -1,0 +1,51 @@
+# =============================================================================
+# .gitignore — Portal Cativo NewsInside_Portal
+# =============================================================================
+
+# --- Secrets e credenciais (NUNCA versionar) ---
+.env
+.env.local
+.env.*.local
+data/portal.env
+*.key
+*.pem
+
+# --- Banco de dados e dados de usuários ---
+data/portal.db
+data/portal.db-wal
+data/portal.db-shm
+data/portal.db-journal
+data/config.json
+
+# --- Logs de usuários (dados pessoais — LGPD) ---
+logs/usuarios/
+logs/portal.log
+
+# --- Python ---
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+ENV/
+env/
+.venv
+pip-log.txt
+pip-delete-this-directory.txt
+
+# --- IDE / Editor ---
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# --- Docker ---
+.dockerignore
+
+# --- Testes locais ---
+.pytest_cache/
+.coverage
+htmlcov/

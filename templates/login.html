@@ -1,0 +1,115 @@
+<!-- =============================================================================
+     login.html — Página de login e cadastro do Portal Cativo NewsInside_Portal
+     =============================================================================
+     Fluxo:
+     1. Aba "Entrar": autentica usuário existente (username + senha + consentimento LGPD)
+     2. Aba "Criar conta": cadastro novo usuário com validação de identidade LGPD
+        - Nome completo (ou nome social, se marcado)
+        - CPF (validado por dígito verificador; opcionalmente via CBC/Serpro)
+        - E-mail (verificado por MX, domínios descartáveis rejeitados)
+        - Usuário e senha (mín. 8 caracteres)
+     Os parâmetros Omada (clientMac, clientIp, apMac, ssidName, radioId, vid) são
+     passados como campos hidden e preservados entre login e pagamento.
+     ============================================================================= -->
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NewsInside_Portal — Acesso</title>
+<style>
+:root{--bg:#0f1220;--card:#181c2f;--txt:#e8eaf6;--mut:#9aa3c7;--acc:#5b8cff;--err:#ff6b6b}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--txt);
+min-height:100vh;display:flex;align-items:center;justify-content:center;padding:16px}
+.card{background:var(--card);border-radius:16px;padding:28px;max-width:420px;width:100%;
+box-shadow:0 8px 32px rgba(0,0,0,.4)}
+h1{font-size:1.3rem;margin-bottom:4px}
+p.sub{color:var(--mut);font-size:.85rem;margin-bottom:20px}
+label{display:block;font-size:.8rem;color:var(--mut);margin:12px 0 4px}
+input[type=text],input[type=password]{width:100%;padding:12px;border-radius:10px;border:1px solid #2c3350;
+background:#111426;color:var(--txt);font-size:1rem}
+input:focus{outline:2px solid var(--acc)}
+.tabs{display:flex;gap:8px;margin-bottom:8px}
+.tabs button{flex:1;padding:10px;border:0;border-radius:10px;background:#111426;color:var(--mut);
+font-weight:600;cursor:pointer}
+.tabs button.on{background:var(--acc);color:#fff}
+.btn{width:100%;padding:13px;margin-top:18px;border:0;border-radius:10px;background:var(--acc);
+color:#fff;font-size:1rem;font-weight:700;cursor:pointer}
+.btn:active{transform:scale(.98)}
+.consent{display:flex;gap:10px;margin-top:14px;font-size:.78rem;color:var(--mut);align-items:flex-start}
+.consent input{margin-top:3px}
+.consent a{color:var(--acc)}
+.err{background:rgba(255,107,107,.12);color:var(--err);padding:10px;border-radius:8px;
+font-size:.85rem;margin-bottom:12px}
+.lgpd{margin-top:16px;font-size:.72rem;color:var(--mut);text-align:center;line-height:1.5}
+.lgpd a{color:var(--acc)}
+{{hidden_fields}}
+</style>
+</head>
+<body>
+<div class="card">
+  <h1>NewsInside_Portal</h1>
+  <p class="sub">Acesso à internet por 1 hora — via PIX</p>
+  {{msg}}
+  <div class="tabs">
+    <button id="tabLogin" class="on" onclick="switchTab('login')">Entrar</button>
+    <button id="tabReg" onclick="switchTab('reg')">Criar conta</button>
+  </div>
+  <form method="POST" action="/login" id="formLogin">
+    {{hidden_fields}}
+    <label>Usuário</label>
+    <input type="text" name="username" required maxlength="64" autocomplete="username">
+    <label>Senha</label>
+    <input type="password" name="password" required autocomplete="current-password">
+    <label class="consent" style="border:0;padding:0">
+      <input type="checkbox" name="consent" required>
+      <span>Li e aceito a <a href="/privacy" target="_blank">Política de Privacidade (LGPD)</a>.
+      Consentimento para tratar meus dados de acesso pelo prazo de 90 dias.</span>
+    </label>
+    <button class="btn" type="submit">Continuar</button>
+  </form>
+  <form method="POST" action="/register" id="formReg" style="display:none">
+    {{hidden_fields}}
+    <label>Nome completo (como consta no CPF)</label>
+    <input type="text" name="full_name" required maxlength="120" autocomplete="name"
+           placeholder="Exatamente como está no seu CPF">
+    <label class="consent" style="border:0;padding:0">
+      <input type="checkbox" name="name_is_social" value="1">
+      <span>Uso <b>nome social</b> — o nome acima é meu nome social. Seu nome de registro
+      <b>nunca</b> é lido, comparado ou exibido: a validação é feita exclusivamente pelo
+      nome social registrado na base do CPF (Receita Federal).</span>
+    </label>
+    <label>CPF</label>
+    <input type="text" name="cpf" required maxlength="14" inputmode="numeric"
+           pattern="[0-9.\-]{11,14}" placeholder="000.000.000-00" autocomplete="off">
+    <label>E-mail</label>
+    <input type="email" name="email" required maxlength="254" autocomplete="email"
+           placeholder="voce@exemplo.com">
+    <label>Usuário (para entrar depois)</label>
+    <input type="text" name="username" required maxlength="64" autocomplete="off">
+    <label>Senha (mín. 8 caracteres)</label>
+    <input type="password" name="password" required minlength="8" autocomplete="new-password">
+    <label class="consent" style="border:0;padding:0">
+      <input type="checkbox" name="consent" required>
+      <span>Li e aceito a <a href="/privacy" target="_blank">Política de Privacidade (LGPD)</a> e
+      autorizo o tratamento dos meus dados ({{dados_consent}}) pelo prazo de 90 dias,
+      conforme Lei 13.709/2018.</span>
+    </label>
+    <button class="btn" type="submit">Criar conta e continuar</button>
+  </form>
+  <p class="lgpd">Seus dados: quem somos, finalidade e seus direitos em
+  <a href="/privacy" target="_blank">/privacy</a>. Exclusão imediata em /me/delete.</p>
+  <p class="lgpd">⚠️ Wi-Fi: se aparecer <b>aviso de certificado</b> ao abrir o portal,
+  <a href="/cert/omada-portal.crt">instale o certificado da rede</a> (uma vez só) e recarregue.</p>
+</div>
+<script>
+function switchTab(w){
+  document.getElementById('tabLogin').classList.toggle('on', w==='login');
+  document.getElementById('tabReg').classList.toggle('on', w==='reg');
+  document.getElementById('formLogin').style.display = w==='login'?'':'none';
+  document.getElementById('formReg').style.display = w==='reg'?'':'none';
+}
+</script>
+</body>
+</html>
