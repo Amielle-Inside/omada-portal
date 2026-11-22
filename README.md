@@ -2,7 +2,7 @@
 
 Portal cativo (captive portal) para redes **Omada SDN / TP-Link** com pagamento via **PIX (LivePix)** e conformidade **LGPD**.
 
-## O que faz
+## Criação
 Tudo criado via Hermes Agent
 
 ## O que faz
