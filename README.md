@@ -3,6 +3,9 @@
 Portal cativo (captive portal) para redes **Omada SDN / TP-Link** com pagamento via **PIX (LivePix)** e conformidade **LGPD**.
 
 ## O que faz
+Tudo criado via Hermes Agent
+
+## O que faz
 
 1. Cliente conecta ao SSID do portal → EAP intercepta → redireciona para este portal com parâmetros Omada (`clientMac`, `clientIp`, `apMac`, `ssidName`, `radioId`, `t`)
 2. Usuário faz cadastro (validação de identidade LGPD) ou login
